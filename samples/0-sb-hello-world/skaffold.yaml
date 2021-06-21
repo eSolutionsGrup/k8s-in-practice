@@ -1,0 +1,22 @@
+apiVersion: skaffold/v2beta17
+kind: Config
+metadata:
+  name: sb-hello-world
+build:
+  artifacts:
+    - image: nexus.esolutions.ro/k8s-in-practice/sb-hello-world
+      jib:
+        args:
+          - -Dmaven.test.skip
+  tagPolicy:
+    envTemplate:
+      template: 'marius'
+deploy:
+  kubectl:
+    manifests:
+    - deployment/0-simple.yml
+#    - deployment/1-accessible.yml
+#    - deployment/2-health.yml
+#    - deployment/3-scaled.yml
+#    - deployment/4-resources.yml
+  kubeContext: k3s

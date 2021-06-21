@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: sb-hello-world
+  namespace: k8s-in-practice
+  labels:
+    app: sb-hello-world
+spec:
+  replicas: 2
+  serviceName: sb-hello-world
+  selector:
+    matchLabels:
+      app: sb-hello-world
+  template:
+    metadata:
+      labels:
+        app: sb-hello-world
+    spec:
+      imagePullSecrets:
+        - name: nexus-registry-credentials
+      containers:
+        - name: sb-hello-world
+          image: nexus.esolutions.ro/k8s-in-practice/sb-hello-world
+          env:
+            - name: MY_ENV_VAR
+              value: "my-value-2"
+          ports:
+          - name: http
+            containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 600M
+            limits:
+              cpu: 400m
+              memory: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sb-hello-world
+  namespace: k8s-in-practice
+spec:
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+  selector:
+    app: sb-hello-world
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: sb-hello-world
+  namespace: k8s-in-practice
+  annotations:
+
+spec:
+  rules:
+    - host: hello-world.localhost
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: sb-hello-world
+                port:
+                  name: http

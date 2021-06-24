@@ -1,5 +1,6 @@
 ### for deployment:
-  * modify cluster name in skaffold.yaml
+  * modify cluster name (kubeContext) in skaffold.yaml according to your defined clusters
+  * create namespace k8s-in-practice
   * build and deploy with skaffold:
   ```shell
   skaffold run
